@@ -8,10 +8,10 @@ DEFAULT_CONFIG = {
         os.path.abspath(os.path.join(os.path.dirname(__file__), ".")),
         "dataflows/data_cache",
     ),
-    # LLM settings
+    # LLM settings - Using Gemini 2.0 models for higher free tier limits
     "llm_provider": "google",
-    "deep_think_llm": "gemini-2.5-pro",
-    "quick_think_llm": "gemini-2.5-flash",
+    "deep_think_llm": "gemini-2.0-flash",      # 15 RPM, 1M tokens/min, 200 RPD
+    "quick_think_llm": "gemini-2.0-flash-lite", # 30 RPM, 1M tokens/min, 200 RPD
     # None - Uses Google's native API endpoints automatically
     # No custom URL needed since langchain-google-genai handles the routing
     "backend_url": None,
@@ -31,5 +31,7 @@ DEFAULT_CONFIG = {
     "tool_vendors": {
         # Example: "get_stock_data": "alpha_vantage",  # Override category default
         # Example: "get_news": "openai",               # Override category default
+        "get_news": "alpha_vantage",        # Ticker-specific news from Alpha Vantage
+        "get_global_news": "openai",        # Global news from OpenAI (fallback available)
     },
 }
