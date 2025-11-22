@@ -1,25 +1,45 @@
 import chromadb
 from chromadb.config import Settings
 from openai import OpenAI
+from langchain_google_genai import GoogleGenerativeAIEmbeddings
+import os
 
 
 class FinancialSituationMemory:
     def __init__(self, name, config):
-        if config["backend_url"] == "http://localhost:11434/v1":
+        self.config = config
+        
+        # Determine embedding approach based on LLM provider
+        if config["llm_provider"].lower() == "google":
+            # Use langchain Google embeddings
+            self.embedding_model = GoogleGenerativeAIEmbeddings(
+                model="models/text-embedding-004",
+                google_api_key=os.getenv("GOOGLE_API_KEY")
+            )
+            self.use_langchain_embeddings = True
+        elif config["backend_url"] == "http://localhost:11434/v1":
             self.embedding = "nomic-embed-text"
+            self.use_langchain_embeddings = False
+            self.client = OpenAI(base_url=config["backend_url"], api_key="ollama")  # Ollama doesn't need real API key
         else:
             self.embedding = "text-embedding-3-small"
-        self.client = OpenAI(base_url=config["backend_url"])
+            self.use_langchain_embeddings = False
+            self.client = OpenAI(base_url=config["backend_url"])
+            
         self.chroma_client = chromadb.Client(Settings(allow_reset=True))
         self.situation_collection = self.chroma_client.create_collection(name=name)
 
     def get_embedding(self, text):
-        """Get OpenAI embedding for a text"""
-        
-        response = self.client.embeddings.create(
-            model=self.embedding, input=text
-        )
-        return response.data[0].embedding
+        """Get embedding for a text based on configured provider"""
+        if self.use_langchain_embeddings:
+            # Use langchain Google embeddings
+            return self.embedding_model.embed_query(text)
+        else:
+            # Use OpenAI embeddings
+            response = self.client.embeddings.create(
+                model=self.embedding, input=text
+            )
+            return response.data[0].embedding
 
     def add_situations(self, situations_and_advice):
         """Add financial situations and their corresponding advice. Parameter is a list of tuples (situation, rec)"""

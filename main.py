@@ -1,3 +1,4 @@
+import os
 from tradingagents.graph.trading_graph import TradingAgentsGraph
 from tradingagents.default_config import DEFAULT_CONFIG
 
@@ -8,8 +9,8 @@ load_dotenv()
 
 # Create a custom config
 config = DEFAULT_CONFIG.copy()
-config["deep_think_llm"] = "gpt-4o-mini"  # Use a different model
-config["quick_think_llm"] = "gpt-4o-mini"  # Use a different model
+config["deep_think_llm"] = "gemini-2.5-pro"  # Use Gemini 2.5 Pro model
+config["quick_think_llm"] = "gemini-2.5-flash"  # Use Gemini 2.5 Flash model
 config["max_debate_rounds"] = 1  # Increase debate rounds
 
 # Configure data vendors (default uses yfinance and alpha_vantage)
